@@ -1,8 +1,8 @@
-id = "quinnjr.herdr-notifications"
-name = "herdr-notifications"
-version = "0.2.0"
+id = "liamwh.herdr-rich-notifications"
+name = "Herdr Rich Notifications"
+version = "0.3.0"
 min_herdr_version = "0.8.0"
-description = "Rich native OS notifications for herdr agent-status changes (blocked/done): herdr-sourced context, no LLM calls, click-to-focus the exact pane (herdr agent focus + Niri window foregrounding on Linux)."
+description = "Rich native OS notifications for herdr agent-status changes (blocked/done): herdr-sourced context, no LLM calls, click-to-focus the exact pane (herdr agent focus + Niri window foregrounding on Linux). Fork of quinnjr/herdr-notifications."
 # herdr's plugin platform enum only knows linux/macos/windows; the underlying
 # binary is plain Rust + notify-rust and also builds/runs on the BSDs.
 # Compositor foregrounding (Niri) is Linux-only and degrades gracefully.

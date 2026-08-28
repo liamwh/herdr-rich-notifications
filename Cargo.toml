@@ -1,6 +1,6 @@
 [package]
 name = "herdr-notifications"
-version = "0.2.0"
+version = "0.3.0"
 edition = "2024"
 description = "Rich native OS desktop notifications for herdr agent-status events (Linux, macOS, Windows, BSD), with zero-LLM context enrichment and click-to-focus."
 license = "MIT"

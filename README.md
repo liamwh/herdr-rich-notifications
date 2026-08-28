@@ -1,21 +1,25 @@
-# herdr-notifications (rich fork)
+# Herdr Rich Notifications
 
 Rich native OS desktop notifications for [herdr](https://herdr.dev) agent
 status changes — enough context to act on without opening herdr, and one
 click to land on the exact agent pane that needs you.
 
-Fork of [`quinnjr/herdr-notifications`] with:
+A fork of [`quinnjr/herdr-notifications`] (upstream history preserved) with:
 
+- **herdr 0.8 support** — parses the 0.8 `{event, data}` event envelope the
+  upstream 0.7-era parser cannot (the 0.7 flat payload is still accepted).
 - **Rich, deterministic context** — the notification title/body are built
   from herdr's own metadata (agent kind, workspace/tab labels, stripped
   terminal title, `agent explain` matched rules, and a small extracted
   prompt excerpt from the detection snapshot). **No LLM/model/API calls,
   ever** — enrichment is pure local rule evaluation and text extraction.
 - **Click-to-focus that crosses the compositor boundary** — clicking runs
-  `herdr agent focus <pane_id>` (right workspace → tab → pane) and then
-  foregrounds the correct terminal *window* on Niri by matching the
-  window-title marker herdr writes (`[ui] window_title`), never just "any
-  WezTerm".
+  `herdr agent focus <pane_id>` (right workspace → tab → pane, against the
+  session that emitted the event) and then foregrounds the correct terminal
+  *window* on Niri by matching the window-title marker herdr writes
+  (`[ui] window_title`), never just "any WezTerm". On macOS, Windows, and
+  non-Niri compositors the herdr pane focus still runs; compositor
+  foregrounding is Niri-only (the configured window is not raised there).
 - **herdr-native timing semantics** — honours herdr's `[ui.toast]
   delay_seconds`, re-verifies the pane is still in the same state after the
   delay, skips the active tab of the focused workspace (like herdr's own
@@ -30,24 +34,29 @@ owns popup delivery; herdr's independent `[ui.sound]` keeps playing sounds.
 
 ## Install
 
-From a checkout:
-
 ```sh
-herdr plugin install quinnjr/herdr-notifications   # upstream (basic)
-# or, this fork:
-herdr plugin link /path/to/herdr-rich-notifications
-cargo build --release   # link does not build; do it yourself
+herdr plugin install liamwh/herdr-rich-notifications
 ```
 
-Nix/Home Manager deployment (the motivating setup) lives in the consuming
-host config: build the crate with `rustPlatform.buildRustPackage`,
-substitute the store binary path into `herdr-plugin.toml`, and link the
-resulting plugin dir idempotently at activation time.
+Requires herdr ≥ 0.8.0 and a Rust toolchain (`cargo`) for the one-time
+build. Or, from a checkout:
+
+```sh
+git clone https://github.com/liamwh/herdr-rich-notifications
+cd herdr-rich-notifications
+cargo build --release
+herdr plugin link .
+```
+
+A Nix/Home Manager deployment variant (built by Nix, manifest rewritten to
+store paths, linked idempotently at activation) is described in the
+[consumer's host config](https://github.com/liamwh/infra); the plugin itself
+is toolchain-agnostic.
 
 ## Configuration
 
 Optional `config.toml` under the plugin's config directory
-(`herdr plugin config-dir quinnjr.herdr-notifications`):
+(`herdr plugin config-dir liamwh.herdr-rich-notifications`):
 
 ```toml
 statuses = ["blocked", "done"]   # which statuses notify
@@ -60,7 +69,7 @@ click_wait_secs = 600            # how long the notification stays clickable
 expire_secs = 30                 # requested on-screen lifetime
 
 [niri]
-enabled = true                   # compositor foregrounding (Linux)
+enabled = true                   # compositor foregrounding (Linux/Niri)
 app_id = "wezterm"               # case-insensitive app_id substring
 title_marker = " · herdr"        # window-title marker identifying herdr
 focus_timeout_ms = 2000          # bounded wait for the title to settle
