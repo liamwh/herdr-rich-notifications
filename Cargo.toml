@@ -1,8 +1,8 @@
 [package]
 name = "herdr-notifications"
-version = "0.1.0"
+version = "0.2.0"
 edition = "2024"
-description = "Relays herdr agent-status events to native OS desktop notifications (Linux, macOS, Windows, BSD)."
+description = "Rich native OS desktop notifications for herdr agent-status events (Linux, macOS, Windows, BSD), with zero-LLM context enrichment and click-to-focus."
 license = "MIT"
 repository = "https://github.com/quinnjr/herdr-notifications"
 readme = "README.md"
@@ -15,8 +15,10 @@ path = "src/main.rs"
 
 [dependencies]
 notify-rust = { version = "4", default-features = false, features = ["z"] }
+regex = "1"
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
+toml = "0.9"
 
 [profile.release]
 opt-level = "s"

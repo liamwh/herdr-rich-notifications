@@ -1,24 +1,29 @@
 id = "quinnjr.herdr-notifications"
 name = "herdr-notifications"
-version = "0.1.0"
-min_herdr_version = "0.7.0"
-description = "Relays herdr agent-status changes (blocked/done) to native OS desktop notifications on Linux, macOS, and Windows (also builds and runs on BSD)."
+version = "0.2.0"
+min_herdr_version = "0.8.0"
+description = "Rich native OS notifications for herdr agent-status changes (blocked/done): herdr-sourced context, no LLM calls, click-to-focus the exact pane (herdr agent focus + Niri window foregrounding on Linux)."
 # herdr's plugin platform enum only knows linux/macos/windows; the underlying
 # binary is plain Rust + notify-rust and also builds/runs on the BSDs.
+# Compositor foregrounding (Niri) is Linux-only and degrades gracefully.
 platforms = ["linux", "macos", "windows"]
 
 [[build]]
 command = ["cargo", "build", "--release"]
 
 # Fires whenever an agent's status flips (idle/working/blocked/done/unknown).
-# The binary itself decides what's worth surfacing (blocked + done only) and
-# dedupes so repeat events for an unchanged status don't re-notify.
+# The binary itself decides what's worth surfacing (blocked + done only),
+# replicates herdr's toast delay + still-in-state recheck + active-tab
+# suppression, and dedupes so repeat events for an unchanged status don't
+# re-notify.
 [[events]]
 on = "pane.agent_status_changed"
 command = ["target/release/herdr-notifications", "event"]
 
-# Manual smoke test: confirms the OS notification backend and permissions
-# are working without waiting for a real agent-status change.
+# Manual smoke test: builds a real rich notification for the focused agent
+# pane (including click-to-focus) so the whole path — daemon, actions,
+# herdr focus, Niri foreground — can be verified without waiting for an
+# agent to block.
 [[actions]]
 id = "test-notification"
 title = "herdr-notifications: send test notification"
@@ -26,10 +31,17 @@ contexts = ["workspace"]
 command = [
   "target/release/herdr-notifications",
   "notify",
-  "--title",
-  "herdr",
-  "--body",
-  "Notifications are working.",
-  "--sound",
-  "done",
+  "--smoke",
+]
+
+# Debugging aid: prints the notification context (title/body plus the
+# deterministic evidence behind them) for the focused pane without
+# notifying.
+[[actions]]
+id = "inspect-notification"
+title = "herdr-notifications: inspect notification context"
+contexts = ["workspace"]
+command = [
+  "target/release/herdr-notifications",
+  "inspect",
 ]
